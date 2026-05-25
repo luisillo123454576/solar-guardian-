@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes.weather import router as weather_router
 
 app = FastAPI(
     title="Solar Guardian AI",
@@ -14,6 +15,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(weather_router, prefix="/api")
 
 @app.get("/")
 def root():
