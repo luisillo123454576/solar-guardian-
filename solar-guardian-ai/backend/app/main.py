@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv() 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.weather import router as weather_router
@@ -5,6 +7,7 @@ from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.emergency import router as emergency_router
 from app.api.routes.forecast import router as forecast_router
 from app.api.routes.alerts import router as alerts_router
+from app.api.routes.copilot import router as copilot_router
 
 app = FastAPI(
     title="Solar Guardian AI",
@@ -25,6 +28,7 @@ app.include_router(dashboard_router, prefix="/api")
 app.include_router(emergency_router, prefix="/api")
 app.include_router(forecast_router, prefix="/api")
 app.include_router(alerts_router, prefix="/api")
+app.include_router(copilot_router, prefix="/api")
 
 @app.get("/")
 def root():
