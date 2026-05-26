@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Zap, AlertTriangle, RefreshCw } from "lucide-react";
 
-// ─── Mock energy data (replace with real context/API) ──────────────────────
+const API_BASE = "http://127.0.0.1:8000";
+
 const MOCK_ENERGY = {
   battery_level: 42,
   solar_generation: 2.8,
@@ -15,9 +16,8 @@ const MOCK_ENERGY = {
   current_time: new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }),
 };
 
-// ─── API call ───────────────────────────────────────────────────────────────
 async function sendMessage(message, history, energyData) {
-  const res = await fetch("/api/copilot", {
+  const res = await fetch(`${API_BASE}/api/copilot`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, history, energy_data: energyData }),
@@ -27,30 +27,31 @@ async function sendMessage(message, history, energyData) {
 }
 
 async function getSuggestions(batteryLevel, riskLevel) {
-  const res = await fetch(`/api/copilot/suggestions?battery_level=${batteryLevel}&risk_level=${riskLevel}`);
+  const battery = batteryLevel ?? 100;
+  const risk = riskLevel ?? "LOW";
+  const res = await fetch(`${API_BASE}/api/copilot/suggestions?battery_level=${battery}&risk_level=${risk}`);
   if (!res.ok) return { suggestions: [] };
   return res.json();
 }
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
 function RiskBanner({ alert }) {
   if (!alert) return null;
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm font-medium animate-pulse">
-      <AlertTriangle size={16} />
+    <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 16px", background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:8, color:"#dc2626", fontSize:13, fontWeight:500 }}>
+      <AlertTriangle size={15} />
       {alert}
     </div>
   );
 }
 
 function EnergyStatusBar({ data }) {
-  const batteryColor = data.battery_level > 60 ? "text-green-400" : data.battery_level > 30 ? "text-yellow-400" : "text-red-400";
+  const batteryColor = data.battery_level > 60 ? "#16a34a" : data.battery_level > 30 ? "#ca8a04" : "#dc2626";
   return (
-    <div className="flex gap-4 text-xs text-gray-400 px-1">
-      <span className={batteryColor}>🔋 {data.battery_level}%</span>
-      <span className="text-yellow-400">☀️ {data.solar_generation} kW</span>
-      <span className="text-blue-400">⚡ {data.autonomy_hours}h autonomía</span>
-      <span className={data.risk_level === "HIGH" ? "text-red-400" : data.risk_level === "MEDIUM" ? "text-yellow-400" : "text-green-400"}>
+    <div style={{ display:"flex", gap:20, fontSize:12, color:"#6b7280" }}>
+      <span style={{ color: batteryColor, fontWeight:600 }}>🔋 {data.battery_level}%</span>
+      <span style={{ color:"#b45309", fontWeight:600 }}>☀️ {data.solar_generation} kW</span>
+      <span style={{ color:"#1d4ed8", fontWeight:600 }}>⚡ {data.autonomy_hours}h autonomía</span>
+      <span style={{ color: data.risk_level === "HIGH" ? "#dc2626" : data.risk_level === "MEDIUM" ? "#ca8a04" : "#16a34a", fontWeight:600 }}>
         {data.risk_level === "HIGH" ? "🔴" : data.risk_level === "MEDIUM" ? "🟡" : "🟢"} {data.risk_level}
       </span>
     </div>
@@ -60,18 +61,24 @@ function EnergyStatusBar({ data }) {
 function ChatBubble({ msg }) {
   const isUser = msg.role === "user";
   return (
-    <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-      {/* Avatar */}
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isUser ? "bg-amber-500/20 border border-amber-500/40" : "bg-blue-500/20 border border-blue-500/40"}`}>
-        {isUser ? <User size={14} className="text-amber-400" /> : <Bot size={14} className="text-blue-400" />}
+    <div style={{ display:"flex", gap:10, flexDirection: isUser ? "row-reverse" : "row", alignItems:"flex-start" }}>
+      <div style={{
+        width:30, height:30, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
+        background: isUser ? "rgba(255,138,0,0.12)" : "rgba(59,130,246,0.1)",
+        border: `1px solid ${isUser ? "rgba(255,138,0,0.3)" : "rgba(59,130,246,0.25)"}`,
+      }}>
+        {isUser ? <User size={14} style={{ color:"#ff8a00" }} /> : <Bot size={14} style={{ color:"#3b82f6" }} />}
       </div>
-
-      {/* Bubble */}
-      <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-        isUser
-          ? "bg-amber-500/15 border border-amber-500/25 text-amber-50 rounded-tr-sm"
-          : "bg-white/5 border border-white/10 text-gray-200 rounded-tl-sm"
-      }`}>
+      <div style={{
+        maxWidth:"72%", padding:"10px 14px", borderRadius:14, fontSize:13.5, lineHeight:1.65,
+        borderTopRightRadius: isUser ? 3 : 14,
+        borderTopLeftRadius: isUser ? 14 : 3,
+        background: isUser ? "rgba(255,138,0,0.08)" : "#f8f9fa",
+        border: `1px solid ${isUser ? "rgba(255,138,0,0.2)" : "rgba(131,117,105,0.12)"}`,
+        color: "#1a1c1e",
+        whiteSpace: "pre-wrap",
+        fontFamily: "'Geist', sans-serif",
+      }}>
         {msg.content}
       </div>
     </div>
@@ -80,26 +87,23 @@ function ChatBubble({ msg }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex gap-3">
-      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500/20 border border-blue-500/40">
-        <Bot size={14} className="text-blue-400" />
+    <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+      <div style={{ width:30, height:30, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(59,130,246,0.1)", border:"1px solid rgba(59,130,246,0.25)" }}>
+        <Bot size={14} style={{ color:"#3b82f6" }} />
       </div>
-      <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
-        {[0, 1, 2].map((i) => (
-          <span key={i} className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+      <div style={{ background:"#f8f9fa", border:"1px solid rgba(131,117,105,0.12)", borderRadius:14, borderTopLeftRadius:3, padding:"12px 16px", display:"flex", gap:5, alignItems:"center" }}>
+        {[0,1,2].map(i => (
+          <span key={i} style={{ width:6, height:6, borderRadius:"50%", background:"#3b82f6", display:"inline-block", animation:"bounce 1s infinite", animationDelay:`${i*0.15}s` }} />
         ))}
       </div>
     </div>
   );
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
-export default function Copilot() {
+export default function Copilot({ energy }) {
+  const currentEnergy = energy || MOCK_ENERGY;
   const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "¡Hola! Soy el Copilot de Solar Guardian AI ⚡\n\nEstoy monitoreando el sistema energético en tiempo real. ¿En qué te puedo ayudar hoy?",
-    },
+    { role:"assistant", content:"¡Hola! Soy el Copilot de Solar Guardian AI ⚡\n\nEstoy monitoreando el sistema energético en tiempo real. ¿En qué te puedo ayudar hoy?" },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -108,37 +112,27 @@ export default function Copilot() {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Load suggestions on mount
   useEffect(() => {
-    getSuggestions(MOCK_ENERGY.battery_level, MOCK_ENERGY.risk_level)
-      .then((data) => setSuggestions(data.suggestions || []));
+    getSuggestions(currentEnergy.battery_level, currentEnergy.risk_level)
+      .then(d => setSuggestions(d.suggestions || []));
   }, []);
 
-  // Auto-scroll
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior:"smooth" });
   }, [messages, loading]);
 
   const handleSend = async (text) => {
     const userText = (text || input).trim();
     if (!userText || loading) return;
-
-    const userMsg = { role: "user", content: userText };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages(p => [...p, { role:"user", content:userText }]);
     setInput("");
     setLoading(true);
-
     try {
-      const history = messages.slice(-8); // last 8 for context
-      const data = await sendMessage(userText, history, MOCK_ENERGY);
-
-      setMessages((prev) => [...prev, { role: "assistant", content: data.response }]);
+      const data = await sendMessage(userText, messages.slice(-8), currentEnergy);
+      setMessages(p => [...p, { role:"assistant", content:data.response }]);
       if (data.risk_alert) setRiskAlert(data.risk_alert);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "⚠️ Error de conexión. Verifica la API y vuelve a intentarlo." },
-      ]);
+      setMessages(p => [...p, { role:"assistant", content:"⚠️ Error de conexión. Verifica la API y vuelve a intentarlo." }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
@@ -146,99 +140,117 @@ export default function Copilot() {
   };
 
   const handleKey = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const clearChat = () => {
-    setMessages([{ role: "assistant", content: "Chat reiniciado. ¿En qué te puedo ayudar? ⚡" }]);
+    setMessages([{ role:"assistant", content:"Chat reiniciado. ¿En qué te puedo ayudar? ⚡" }]);
     setRiskAlert(null);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#0B1020] text-white">
-      {/* ── Header ── */}
-      <div className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-            <Zap size={20} className="text-white" />
+    <div style={{
+      display:"flex", flexDirection:"column",
+      height:"100%",
+      background:"#ffffff",
+      borderRadius:16,
+      border:"1px solid rgba(131,117,105,0.12)",
+      overflow:"hidden",
+      boxShadow:"0 4px 20px -2px rgba(131,117,105,0.08)",
+    }}>
+
+      {/* Header */}
+      <div style={{ borderBottom:"1px solid rgba(131,117,105,0.1)", padding:"14px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", flexShrink:0, background:"#fff" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#ff8a00,#e65c00)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <Zap size={18} color="white" />
           </div>
           <div>
-            <h1 className="font-semibold text-white">AI Energy Copilot</h1>
-            <p className="text-xs text-gray-400">Solar Guardian AI · La Guajira</p>
+            <div style={{ fontWeight:700, fontSize:15, color:"#1a1c1e", fontFamily:"'Geist',sans-serif" }}>Copilot Energético IA</div>
+            <div style={{ fontSize:11, color:"#837569", fontFamily:"'JetBrains Mono',monospace" }}>Solar Guardian AI · La Guajira</div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs text-gray-400">En línea</span>
-          <button onClick={clearChat} className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Limpiar chat">
-            <RefreshCw size={16} className="text-gray-400" />
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <span style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", display:"inline-block" }} />
+          <span style={{ fontSize:12, color:"#6b7280", fontFamily:"'Geist',sans-serif" }}>En línea</span>
+          <button onClick={clearChat} style={{ padding:6, background:"transparent", border:"1px solid rgba(131,117,105,0.15)", cursor:"pointer", borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center" }} title="Limpiar chat">
+            <RefreshCw size={14} color="#837569" />
           </button>
         </div>
       </div>
 
-      {/* ── Energy Status Bar ── */}
-      <div className="px-6 py-2 border-b border-white/5">
-        <EnergyStatusBar data={MOCK_ENERGY} />
+      {/* Energy bar */}
+      <div style={{ padding:"10px 20px", borderBottom:"1px solid rgba(131,117,105,0.08)", flexShrink:0, background:"#faf8f6" }}>
+        <EnergyStatusBar data={currentEnergy} />
       </div>
 
-      {/* ── Risk Alert ── */}
+      {/* Risk alert */}
       {riskAlert && (
-        <div className="px-6 pt-3">
+        <div style={{ padding:"10px 20px 0", flexShrink:0 }}>
           <RiskBanner alert={riskAlert} />
         </div>
       )}
 
-      {/* ── Messages ── */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-        {messages.map((msg, i) => (
-          <ChatBubble key={i} msg={msg} />
-        ))}
+      {/* Messages */}
+      <div style={{ flex:1, overflowY:"auto", padding:"20px", display:"flex", flexDirection:"column", gap:14, minHeight:0, background:"#fff" }}>
+        {messages.map((msg, i) => <ChatBubble key={i} msg={msg} />)}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Quick Suggestions ── */}
+      {/* Suggestions */}
       {suggestions.length > 0 && messages.length <= 2 && (
-        <div className="px-6 pb-2 flex gap-2 flex-wrap">
+        <div style={{ padding:"0 20px 10px", display:"flex", gap:8, flexWrap:"wrap", flexShrink:0, background:"#fff" }}>
           {suggestions.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => handleSend(s.replace(/^[^\w]+/, "").trim())}
-              className="text-xs px-3 py-1.5 bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 rounded-full text-gray-300 hover:text-amber-300 transition-all"
-            >
+            <button key={i} onClick={() => handleSend(s.replace(/^[^\w]+/, "").trim())} style={{
+              fontSize:12, padding:"5px 12px",
+              background:"rgba(255,138,0,0.06)",
+              border:"1px solid rgba(255,138,0,0.2)",
+              borderRadius:999, color:"#51453a", cursor:"pointer",
+              fontFamily:"'Geist',sans-serif",
+            }}>
               {s}
             </button>
           ))}
         </div>
       )}
 
-      {/* ── Input ── */}
-      <div className="px-6 pb-6 pt-2 border-t border-white/10">
-        <div className="flex gap-3 items-end">
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="Pregunta sobre el sistema energético..."
-              rows={1}
-              className="w-full bg-white/5 border border-white/15 hover:border-white/25 focus:border-amber-500/50 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 outline-none resize-none transition-colors"
-              style={{ minHeight: "48px", maxHeight: "120px" }}
-            />
-          </div>
-          <button
-            onClick={() => handleSend()}
-            disabled={!input.trim() || loading}
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:from-amber-400 hover:to-orange-500 transition-all active:scale-95"
-          >
-            <Send size={18} className="text-white" />
+      {/* Input */}
+      <div style={{ padding:"12px 20px 16px", borderTop:"1px solid rgba(131,117,105,0.1)", flexShrink:0, background:"#fff" }}>
+        <div style={{ display:"flex", gap:10, alignItems:"flex-end" }}>
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder="Pregunta sobre el sistema energético..."
+            rows={1}
+            style={{
+              flex:1,
+              background:"#f8f9fa",
+              border:"1px solid rgba(131,117,105,0.2)",
+              borderRadius:10, padding:"10px 14px",
+              fontSize:13.5, color:"#1a1c1e",
+              outline:"none", resize:"none",
+              minHeight:44, maxHeight:110,
+              fontFamily:"'Geist',sans-serif",
+              lineHeight:1.5,
+            }}
+          />
+          <button onClick={() => handleSend()} disabled={!input.trim() || loading} style={{
+            width:44, height:44, borderRadius:10, flexShrink:0,
+            background: (!input.trim() || loading) ? "rgba(255,138,0,0.3)" : "#ff8a00",
+            border:"none", cursor: (!input.trim() || loading) ? "not-allowed" : "pointer",
+            display:"flex", alignItems:"center", justifyContent:"center",
+            boxShadow: (!input.trim() || loading) ? "none" : "0 2px 8px rgba(255,138,0,0.3)",
+            transition:"all 0.15s",
+          }}>
+            <Send size={16} color="white" />
           </button>
         </div>
-        <p className="text-xs text-gray-600 mt-2 text-center">Enter para enviar · Shift+Enter nueva línea</p>
+        <p style={{ fontSize:11, color:"#9ca3af", marginTop:7, textAlign:"center", fontFamily:"'JetBrains Mono',monospace" }}>
+          Enter para enviar · Shift+Enter nueva línea
+        </p>
       </div>
     </div>
   );

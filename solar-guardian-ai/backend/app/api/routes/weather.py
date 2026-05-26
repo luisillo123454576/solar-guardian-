@@ -1,3 +1,4 @@
+# Script de la ruta del clima, que proporciona datos meteorológicos actuales y pronósticos para ayudar a los usuarios a entender cómo las condiciones climáticas pueden afectar la generación de energía solar y el consumo energético.
 from fastapi import APIRouter, HTTPException
 from app.services.weather_service import get_weather_data
 

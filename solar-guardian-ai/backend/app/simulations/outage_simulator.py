@@ -1,3 +1,4 @@
+# Script del simulador de eventos de corte, que genera eventos de corte simulados basados en condiciones aleatorias, proporcionando información sobre el tipo de evento, las zonas afectadas, la gravedad y el estado de emergencia para ayudar a los usuarios a entender cómo podrían afectar los cortes de energía a su sistema y tomar decisiones informadas sobre su consumo energético.
 import random
 from datetime import datetime
 

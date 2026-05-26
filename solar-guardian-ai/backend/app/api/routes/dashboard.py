@@ -1,3 +1,4 @@
+# Script de la ruta del dashboard, que proporciona una visión general del estado actual del sistema, incluyendo datos meteorológicos, energía generada y estado de los edificios.
 from fastapi import APIRouter, HTTPException
 from app.services.weather_service import get_weather_data
 from app.services.energy_engine import get_energy_snapshot

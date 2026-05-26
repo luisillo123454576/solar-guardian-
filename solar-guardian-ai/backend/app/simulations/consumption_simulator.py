@@ -1,3 +1,5 @@
+# Script del simulador de consumo, que genera datos de consumo energético simulados basados en la hora del día y el modo de emergencia, proporcionando información sobre el consumo total en kW, los sistemas activos, si es hora pico o no, y la última actualización para ayudar a los usuarios a entender su patrón de consumo energético y tomar decisiones informadas sobre su uso de energía.
+
 import random
 from datetime import datetime
 

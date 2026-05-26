@@ -1,3 +1,4 @@
+#script de la ruta del copilot, que maneja las interacciones con el modelo de lenguaje para proporcionar respuestas contextuales y alertas de riesgo basadas en el estado energético actual.
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional

@@ -1,3 +1,4 @@
+# Script del motor de energía, que calcula el balance energético actual basado en la radiación solar, la cobertura de nubes y el consumo energético, proporcionando un snapshot del estado energético del sistema que incluye generación solar estimada, nivel de batería, consumo total y un score de resiliencia para ayudar a los usuarios a entender su situación energética actual y tomar decisiones informadas.
 from app.simulations.battery_simulator import get_battery_status
 from app.simulations.consumption_simulator import get_consumption_data
 

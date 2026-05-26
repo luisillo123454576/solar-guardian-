@@ -1,3 +1,4 @@
+# Script de la ruta de pronóstico, que proporciona predicciones detalladas sobre la generación solar, el consumo energético y el estado de la batería para ayudar a los usuarios a planificar su uso de energía y tomar decisiones informadas sobre su consumo.
 from fastapi import APIRouter, HTTPException
 from app.services.weather_service import get_weather_data
 from app.services.energy_engine import get_energy_snapshot
