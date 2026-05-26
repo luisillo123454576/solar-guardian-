@@ -32,6 +32,7 @@ const pulse = `
 `;
 
 const FULL_VIEWS = ["copilot", "map"];
+const KNOWN_VIEWS = ["dashboard", "emergency", "simulate", "forecast", "copilot", "map"];
 
 export default function App() {
   const [active, setActive] = useState("dashboard");
@@ -63,7 +64,6 @@ export default function App() {
   };
 
   const isFull = FULL_VIEWS.includes(active);
-  const KNOWN_VIEWS = ["dashboard", "emergency", "simulate", "forecast", "copilot", "map"];
 
   return (
     <>
@@ -89,15 +89,18 @@ export default function App() {
         position: "relative",
         zIndex: 1,
       }}>
-        {/* Vistas full-height sin padding */}
         {isFull && (
           <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {active === "copilot" && <CopilotView energy={energy} />}
-            {active === "map"     && <CommunityMap isEmergency={isEmergency} />}
+            {active === "map" && (
+              <CommunityMap
+                isEmergency={isEmergency}
+                simState={simState}
+              />
+            )}
           </div>
         )}
 
-        {/* Vistas con padding y scroll */}
         {!isFull && (
           <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
             {active === "dashboard" && (
@@ -109,11 +112,8 @@ export default function App() {
             {active === "simulate" && (
               <SimulationsPanel simulate={simulate} simState={simState} />
             )}
-            {active === "forecast" && (
-              <ForecastingView />
-            )}
+            {active === "forecast" && <ForecastingView />}
 
-            {/* Fallback para vistas no implementadas */}
             {!KNOWN_VIEWS.includes(active) && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60vh", gap: 16 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#d5c3b6" }}>construction</span>
