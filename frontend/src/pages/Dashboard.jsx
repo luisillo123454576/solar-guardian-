@@ -96,7 +96,7 @@ export default function Dashboard({ energy, agentMsg, onRunAgent, loading, histo
         <div style={{ flex:1 }}>
           <h2 style={{ fontFamily:"'Geist',sans-serif", fontSize:28, fontWeight:600, color:"#1a1c1e", marginBottom:8 }}>Puntuación de Resiliencia IA</h2>
           <p style={{ fontFamily:"'Geist',sans-serif", color:"#51453a", lineHeight:1.7, marginBottom:24, fontSize:15 }}>
-            Sistema operando en máxima eficiencia. Todos los nodos sincronizados con el pico solar de La Guajira.
+            Sistema operando. Todos los nodos sincronizados con el pico solar de La Guajira.
             Autonomía prevista sobre el umbral de seguridad por los próximos 4 días.
           </p>
           <div style={{ display:"flex", gap:12 }}>

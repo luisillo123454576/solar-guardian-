@@ -46,7 +46,7 @@ export async function triggerNotify(trigger, extras = {}) {
 
 // ── NUEVOS ────────────────────────────────────────────────────────────────────
 export async function fetchForecast() {
-  const res = await fetch(`${API}/forecast`);
+  const res = await fetch(`${API}/api/forecast`);  // ← debe tener /api/
   if (!res.ok) throw new Error("forecast fetch failed");
   return res.json();
 }

@@ -5,6 +5,8 @@ import DashboardView from "./pages/Dashboard";
 import EmergencyView from "./pages/Emergency";
 import CopilotView from "./pages/Copilot";
 import SimulationsPanel from "./pages/Simulations";
+import ForecastingView from "./pages/Forecasting";
+import CommunityMap from "./pages/CommunityMap";
 import { useEnergy } from "./hooks/useEnergy";
 import { simulateBlackout } from "./services/api";
 
@@ -28,6 +30,8 @@ const pulse = `
   50% { opacity:0.35; }
 }
 `;
+
+const FULL_VIEWS = ["copilot", "map"];
 
 export default function App() {
   const [active, setActive] = useState("dashboard");
@@ -58,7 +62,8 @@ export default function App() {
     setActive("dashboard");
   };
 
-  const isCopilot = active === "copilot";
+  const isFull = FULL_VIEWS.includes(active);
+  const KNOWN_VIEWS = ["dashboard", "emergency", "simulate", "forecast", "copilot", "map"];
 
   return (
     <>
@@ -74,7 +79,6 @@ export default function App() {
       <Sidebar active={active} setActive={setActive} onEmergencyOverride={triggerEmergency} />
       <TopBar onSimulateBlackout={isEmergency ? cancelEmergency : triggerEmergency} isEmergency={isEmergency} />
 
-      {/* main: ocupa todo el espacio a la derecha del sidebar, debajo del topbar */}
       <main style={{
         marginLeft: 256,
         paddingTop: 80,
@@ -85,15 +89,16 @@ export default function App() {
         position: "relative",
         zIndex: 1,
       }}>
-        {/* Copilot: sin padding, ocupa todo el alto restante */}
-        {isCopilot && (
+        {/* Vistas full-height sin padding */}
+        {isFull && (
           <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <CopilotView energy={energy} />
+            {active === "copilot" && <CopilotView energy={energy} />}
+            {active === "map"     && <CommunityMap isEmergency={isEmergency} />}
           </div>
         )}
 
-        {/* Resto de vistas: con padding normal y scroll */}
-        {!isCopilot && (
+        {/* Vistas con padding y scroll */}
+        {!isFull && (
           <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
             {active === "dashboard" && (
               <DashboardView energy={energy} agentMsg={agentMsg} loading={loading} />
@@ -104,7 +109,12 @@ export default function App() {
             {active === "simulate" && (
               <SimulationsPanel simulate={simulate} simState={simState} />
             )}
-            {!["dashboard", "emergency", "simulate"].includes(active) && (
+            {active === "forecast" && (
+              <ForecastingView />
+            )}
+
+            {/* Fallback para vistas no implementadas */}
+            {!KNOWN_VIEWS.includes(active) && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60vh", gap: 16 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#d5c3b6" }}>construction</span>
                 <p style={{ fontFamily: "'Geist',sans-serif", color: "#837569", fontSize: 16 }}>Módulo en desarrollo</p>

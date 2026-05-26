@@ -157,7 +157,7 @@ export default function ForecastingView() {
       </button>
     </div>
   );
-
+  if (!datos) return null;
   const { solar_forecast, consumption_forecast, battery_forecast, risk_estimation, community } = datos;
   const riesgo = RIESGO_CFG[risk_estimation.risk_level] ?? RIESGO_CFG.low;
   const ahora = new Date().getHours();
