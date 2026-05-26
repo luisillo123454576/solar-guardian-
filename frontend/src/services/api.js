@@ -35,11 +35,24 @@ export async function getCopilotSuggestions(batteryLevel, riskLevel) {
 }
 
 export async function triggerNotify(trigger, extras = {}) {
-  const res = await fetch(`${API}/notify`, {
+  const res = await fetch(`${API}/api/notify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ trigger, ...extras }),
   });
   if (!res.ok) throw new Error("notify failed");
+  return res.json();
+}
+
+// ── NUEVOS ────────────────────────────────────────────────────────────────────
+export async function fetchForecast() {
+  const res = await fetch(`${API}/api/forecast`);  // ← debe tener /api/
+  if (!res.ok) throw new Error("forecast fetch failed");
+  return res.json();
+}
+
+export async function fetchWeather() {
+  const res = await fetch(`${API}/weather`);
+  if (!res.ok) throw new Error("weather fetch failed");
   return res.json();
 }

@@ -4,7 +4,7 @@ import {
 } from "recharts";
 
 /* ─── API ────────────────────────────────────────────────────────────────── */
-const API_BASE = "http://localhost:8000";
+const API_BASE = "http://localhost:8000/api";
 
 async function fetchDashboard() {
   const res = await fetch(`${API_BASE}/dashboard`);
@@ -368,9 +368,9 @@ export default function Dashboard({ agentMsg, onRunAgent, loading: agentLoading 
   const radiationWm2 = weather.solar_radiation != null
     ? Math.round(weather.solar_radiation)
     : null;
-  const cloudPct   = weather.cloud_cover != null
-    ? Math.round(weather.cloud_cover * 100)
-    : null;
+  const cloudPct = weather.cloud_cover != null
+  ? Math.round(weather.cloud_cover)  // ya viene en %
+  : null;
 
   /* ── Helpers para extraer arrays del forecast ──
      Soporta tanto array [{hour:0,value:x}] como dict {0:x, 1:x, ...}
@@ -744,7 +744,7 @@ const batteryPattern     = extractByHour(forecast?.battery_forecast,      "batte
 
       {/* ── KPI CHIPS (buildings reales) ─────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 24 }}>
-        <KpiChip label="Edificios Monitoreados"  value={fetching ? "···" : buildings.length}         loading={fetching} />
+        <KpiChip label="Estaciones Monitoreadas"  value={fetching ? "···" : buildings.length}         loading={fetching} />
         <KpiChip label="Carga Crítica Activa"    value={fetching ? "···" : criticalBuildings.length} loading={fetching} />
         <KpiChip label="Consumo Total"           value={fetching ? "···" : totalConsumption ? `${totalConsumption} kWh` : "—"} loading={fetching} />
         <KpiChip label="Batería Prom. Edificios" value={fetching ? "···" : avgBatBuildings ? `${avgBatBuildings}%` : "—"} loading={fetching} />

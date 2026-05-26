@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 from collections import defaultdict
 
-DATASET_PATH = Path(__file__).parent.parent.parent.parent / "dataset" / "raw" / "dataset_guajira_hybrid_ready.csv"
+DATASET_PATH = Path(__file__).parent.parent.parent / "dataset" / "raw" / "dataset_guajira_hybrid_ready.csv"
 
 def load_dataset() -> list:
     rows = []

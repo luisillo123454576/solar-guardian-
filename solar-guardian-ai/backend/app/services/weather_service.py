@@ -36,7 +36,8 @@ async def get_weather_data():
     hourly = data["hourly"]
 
     # Radiación solar de la hora actual
-    current_hour_index = 0
+    from datetime import datetime
+    current_hour_index = datetime.now().hour
     radiation = hourly["direct_radiation"][current_hour_index]
 
     return {
