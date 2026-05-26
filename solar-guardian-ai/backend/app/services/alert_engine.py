@@ -1,3 +1,4 @@
+# Script del motor de alertas, que analiza los datos de energía, clima y estado de los edificios para generar alertas contextuales sobre el estado del sistema, incluyendo niveles críticos de batería, condiciones meteorológicas adversas y estabilidad de la red eléctrica.
 from datetime import datetime
 
 def generate_alerts(energy: dict, weather: dict, buildings: list) -> list:

@@ -1,3 +1,4 @@
+# Script del servicio de dataset, que se encarga de cargar y procesar los datos del conjunto de datos para proporcionar patrones de consumo energético, niveles de batería y un snapshot del estado actual de los edificios, que luego pueden ser utilizados por otras partes del sistema para análisis y generación de alertas.
 import csv
 from pathlib import Path
 from collections import defaultdict

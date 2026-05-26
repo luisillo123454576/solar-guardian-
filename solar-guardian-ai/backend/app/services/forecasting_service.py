@@ -1,3 +1,4 @@
+# Script del servicio de pronóstico, que genera predicciones detalladas sobre la generación solar, el consumo energético y el estado de la batería para ayudar a los usuarios a planificar su uso de energía y tomar decisiones informadas sobre su consumo.
 from datetime import datetime
 import random
 from app.services.dataset_service import get_hourly_consumption_pattern, get_hourly_battery_pattern

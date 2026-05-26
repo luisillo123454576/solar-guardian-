@@ -1,3 +1,4 @@
+# Script del servicio de clima, que se encarga de obtener datos meteorológicos actuales y pronósticos para ayudar a los usuarios a entender cómo las condiciones climáticas pueden afectar la generación de energía solar y el consumo energético.
 import httpx
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"

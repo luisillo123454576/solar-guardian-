@@ -1,3 +1,4 @@
+# Script de la ruta de emergencia, que maneja la lógica para determinar el estado de emergencia basado en los niveles de batería y las condiciones meteorológicas, así como la simulación de eventos de corte de energía para pruebas y validación del sistema.
 from fastapi import APIRouter, HTTPException
 from app.services.weather_service import get_weather_data
 from app.services.energy_engine import get_energy_snapshot
